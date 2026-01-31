@@ -1,415 +1,281 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interval Timer with Progress & Time Left</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interval Timer with Excel Import / Export</title>
 
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial;
-            background: #fff;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-        }
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
-        .container {
-            width: 75vw;
-            max-width: 900px;
-            min-width: 320px;
-            padding: 20px;
-            margin: 20px auto;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-            background: #ffffff;
-        }
+<style>
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial;
+    background: #fff;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+}
+.container {
+    width: 75vw;
+    max-width: 900px;
+    min-width: 320px;
+    padding: 20px;
+    margin: 20px auto;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+.stats {
+    display: flex;
+    justify-content: space-between;
+    text-align: center;
+}
+.stat-label { font-size: 12px; color: #8e8e93; }
+.stat-value { font-size: 22px; font-weight: 600; }
 
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 12px 0;
+}
+.header-buttons button { margin-left: 6px; }
 
-        .stats {
-            display: flex;
-            justify-content: space-between;
-            text-align: center;
-            margin-bottom: 15px;
-        }
+.add-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #007aff;
+    color: #fff;
+    font-size: 18px;
+    border: none;
+    cursor: pointer;
+}
 
-        .stat-label {
-            font-size: 12px;
-            color: #8e8e93;
-        }
+.interval {
+    background: #f2f2f7;
+    padding: 12px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    cursor: grab;
+}
+.interval.current { background: #e5e5ea; }
+.interval.dragging { opacity: 0.5; }
 
-        .stat-value {
-            font-size: 22px;
-            font-weight: 600;
-        }
+.row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.color { width: 5px; height: 36px; border-radius: 3px; }
+.red { background:#ff3b30; }
+.orange { background:#ff9500; }
+.blue { background:#007aff; }
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin: 12px 0;
-        }
+.details {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+}
+.name-input, .time-input {
+    border: none;
+    background: transparent;
+    font-size: 16px;
+}
+.time-input { width: 70px; text-align: right; }
 
-        .add-btn {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background: #007aff;
-            color: #fff;
-            font-size: 22px;
-            border: none;
-            cursor: pointer;
-        }
+.delete-btn {
+    border: none;
+    background: transparent;
+    font-size: 18px;
+    color: #ff3b30;
+    cursor: pointer;
+}
 
-        .interval {
-            background: #f2f2f7;
-            padding: 12px;
-            border-radius: 12px;
-            margin-bottom: 10px;
-            cursor: grab;
-        }
+.progress-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+}
+.progress-track {
+    flex: 1;
+    height: 6px;
+    background: #d1d1d6;
+    border-radius: 3px;
+}
+.progress-fill {
+    height: 100%;
+    background: #007aff;
+}
+.time-left { font-size: 12px; }
 
-            .interval.current {
-                background: #e5e5ea;
-            }
-
-            .interval.dragging {
-                opacity: 0.5;
-            }
-
-        .row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .color {
-            width: 5px;
-            height: 36px;
-            border-radius: 3px;
-        }
-
-        .red {
-            background: #ff3b30;
-        }
-
-        .orange {
-            background: #ff9500;
-        }
-
-        .blue {
-            background: #007aff;
-        }
-
-        .details {
-            flex: 1;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .name-input {
-            border: none;
-            background: transparent;
-            font-weight: 600;
-            width: 300px;
-        }
-
-        .time-input {
-            width: 70px;
-            font-size: 16px;
-            text-align: right;
-            border: none;
-            background: transparent;
-        }
-
-        .delete-btn {
-            border: none;
-            background: transparent;
-            font-size: 18px;
-            cursor: pointer;
-            color: #ff3b30;
-        }
-
-        .progress-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 8px;
-            gap: 10px;
-        }
-
-        .progress-track {
-            flex: 1;
-            height: 6px;
-            background: #d1d1d6;
-            border-radius: 3px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            width: 0%;
-            background: #007aff;
-            transition: width 0.4s linear;
-        }
-
-        .time-left {
-            font-size: 12px;
-            color: #3a3a3c;
-            min-width: 45px;
-            text-align: right;
-        }
-
-        .controls {
-            display: flex;
-            justify-content: space-around;
-            margin-top: 30px;
-        }
-
-        .play {
-            width: 60px;
-            height: 60px;
-            background: #ff9500;
-            color: white;
-            border-radius: 50%;
-            font-size: 30px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-        }
-
-        .btn {
-            font-size: 24px;
-            cursor: pointer;
-            color: #8e8e93;
-        }
-    </style>
+.controls {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 30px;
+}
+.play {
+    width: 60px;
+    height: 60px;
+    background: #ff9500;
+    color: white;
+    border-radius: 50%;
+    font-size: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+.btn { font-size: 24px; cursor: pointer; }
+</style>
 </head>
 
 <body>
-    <div class="container">
+<div class="container">
 
-        <div class="stats">
-            <div>
-                <div class="stat-label">Elapsed</div>
-                <div class="stat-value" id="elapsed">00:00</div>
-            </div>
-            <div>
-                <div class="stat-label">Lap</div>
-                <div class="stat-value" id="lapCount">1/1</div>
-            </div>
-            <div>
-                <div class="stat-label">Left</div>
-                <div class="stat-value" id="timeLeft">00:00</div>
-            </div>
-        </div>
+<div class="stats">
+    <div><div class="stat-label">Elapsed</div><div id="elapsed">00:00</div></div>
+    <div><div class="stat-label">Lap</div><div id="lapCount">1/1</div></div>
+    <div><div class="stat-label">Left</div><div id="timeLeft">00:00</div></div>
+</div>
 
-        <div class="header">
-            <strong>Intervals</strong>
-            <button class="add-btn" onclick="addInterval()">+</button>
-        </div>
-
-        <div id="intervalList"></div>
-
-        <div class="controls">
-            <span class="btn" onclick="resetTimer()">↻</span>
-            <div class="play" id="playBtn" onclick="toggleTimer()">▶</div>
-            <span class="btn" onclick="skipInterval()">⏭</span>
-        </div>
-
+<div class="header">
+    <strong>Intervals</strong>
+    <div class="header-buttons">
+        <button class="add-btn" onclick="addInterval()">+</button>
+        <button class="add-btn" onclick="downloadExcel()">⬇</button>
+        <button class="add-btn" onclick="uploadExcel()">⬆</button>
+        <input type="file" id="excelInput" hidden>
     </div>
+</div>
 
-    <script>
-const colors = ["red","orange","blue"];
-let dragIndex = null;
+<div id="intervalList"></div>
 
-let intervals = [
-    { name:"Interval 1", total:60, remaining:60, elapsed:0, color:"red" }
-];
+<div class="controls">
+    <span class="btn" onclick="resetTimer()">↻</span>
+    <div class="play" id="playBtn" onclick="toggleTimer()">▶</div>
+    <span class="btn" onclick="skipInterval()">⏭</span>
+</div>
 
-let current = 0;
-let timer = null;
-let running = false;
-let totalElapsed = 0;
+</div>
 
-/* ---------- helpers ---------- */
-const fmt = s =>
- `${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
+<script>
+const colors=["red","orange","blue"];
+let intervals=[{name:"Interval 1",total:60,remaining:60,elapsed:0,color:"red"}];
+let current=0,timer=null,running=false,totalElapsed=0,dragIndex=null;
 
-const mmssToSeconds = v => {
-    const [m,s] = v.split(":").map(Number);
-    return (m*60)+(s||0);
+const fmt=s=>`${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
+const mmss=v=>{const[m,s]=v.split(":").map(Number);return m*60+(s||0);};
+
+function beep(f=1000,d=150){
+ const c=new AudioContext(),o=c.createOscillator(),g=c.createGain();
+ o.connect(g);g.connect(c.destination);o.frequency.value=f;g.gain.value=.1;
+ o.start();setTimeout(()=>{o.stop();c.close()},d);
+}
+
+function render(){
+ intervalList.innerHTML="";
+ intervals.forEach((i,idx)=>{
+  const div=document.createElement("div");
+  div.className="interval"+(idx===current?" current":"");
+  div.draggable=true;
+  div.ondragstart=()=>dragIndex=idx;
+  div.ondrop=()=>reorder(idx);
+  div.ondragover=e=>e.preventDefault();
+
+  div.innerHTML=`
+   <div class="row">
+    <div class="color ${i.color}"></div>
+    <div class="details">
+     <input class="name-input" value="${i.name}" onblur="iName(${idx},this.value)">
+     <input class="time-input" value="${fmt(i.total)}" onblur="iTime(${idx},this.value)">
+    </div>
+    <button class="delete-btn" onclick="del(${idx})">🗑</button>
+   </div>
+   <div class="progress-row">
+    <div class="progress-track"><div class="progress-fill" style="width:${i.elapsed/i.total*100}%"></div></div>
+    <div class="time-left">${fmt(i.remaining)}</div>
+   </div>`;
+  intervalList.appendChild(div);
+ });
+}
+
+function iName(i,v){if(v.trim())intervals[i].name=v;}
+function iTime(i,v){
+ const s=mmss(v); if(s>0){intervals[i].total=s;intervals[i].remaining=s;intervals[i].elapsed=0;}
+ render();update();
+}
+
+function reorder(i){
+ if(i===dragIndex)return;
+ intervals.splice(i,0,intervals.splice(dragIndex,1)[0]);
+ render();update();
+}
+
+function addInterval(){
+ intervals.push({name:`Interval ${intervals.length+1}`,total:60,remaining:60,elapsed:0,color:colors[intervals.length%colors.length]});
+ render();update();
+}
+
+function del(i){
+ if(intervals.length===1)return;
+ intervals.splice(i,1);
+ current=Math.min(current,intervals.length-1);
+ render();update();
+}
+
+function tick(){
+ const c=intervals[current];
+ if(c.remaining<=3&&c.remaining>0)beep();
+ c.remaining--;c.elapsed++;totalElapsed++;
+ if(c.remaining<=0){
+  beep(1400,300);
+  if(current<intervals.length-1)current++;
+  else return stop();
+ }
+ render();update();
+}
+
+function start(){timer=setInterval(tick,1000);running=true;playBtn.textContent="⏸";}
+function stop(){clearInterval(timer);running=false;playBtn.textContent="▶";}
+function toggleTimer(){running?stop():start();}
+function resetTimer(){stop();current=0;totalElapsed=0;intervals.forEach(i=>{i.remaining=i.total;i.elapsed=0});render();update();}
+function skipInterval(){intervals[current].remaining=1;}
+
+function update(){
+ elapsed.textContent=fmt(totalElapsed);
+ lapCount.textContent=`${current+1}/${intervals.length}`;
+ timeLeft.textContent=fmt(intervals.slice(current).reduce((s,i)=>s+i.remaining,0));
+}
+
+/* ===== Excel (NO COLOR COLUMN) ===== */
+function downloadExcel(){
+ const data=intervals.map(i=>({
+  Name:i.name,
+  Minutes:Math.floor(i.total/60),
+  Seconds:i.total%60
+ }));
+ const ws=XLSX.utils.json_to_sheet(data);
+ const wb=XLSX.utils.book_new();
+ XLSX.utils.book_append_sheet(wb,ws,"Intervals");
+ XLSX.writeFile(wb,"intervals.xlsx");
+}
+
+function uploadExcel(){excelInput.click();}
+excelInput.onchange=e=>{
+ const r=new FileReader();
+ r.onload=x=>{
+  const wb=XLSX.read(new Uint8Array(x.target.result),{type:"array"});
+  const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+  intervals=rows.map((r,i)=>{
+   const t=(+r.Minutes||0)*60+(+r.Seconds||0)||60;
+   return {name:r.Name||`Interval ${i+1}`,total:t,remaining:t,elapsed:0,color:colors[i%colors.length]};
+  });
+  resetTimer();
+ };
+ r.readAsArrayBuffer(e.target.files[0]);
 };
 
-function beep(freq=1000,dur=160){
-    const ctx=new AudioContext();
-    const o=ctx.createOscillator();
-    const g=ctx.createGain();
-    o.connect(g); g.connect(ctx.destination);
-    o.frequency.value=freq;
-    g.gain.value=0.12;
-    o.start();
-    setTimeout(()=>{o.stop();ctx.close();},dur);
-}
-
-const vibrate = p => navigator.vibrate && navigator.vibrate(p);
-
-/* ---------- render ---------- */
-function render(){
-    intervalList.innerHTML="";
-    intervals.forEach((i,idx)=>{
-        const percent = ((i.elapsed / i.total) * 100).toFixed(1);
-
-        const div=document.createElement("div");
-        div.className="interval"+(idx===current?" current":"");
-        div.draggable=true;
-
-        div.ondragstart=()=>{dragIndex=idx;div.classList.add("dragging");};
-        div.ondragend=()=>div.classList.remove("dragging");
-        div.ondragover=e=>e.preventDefault();
-        div.ondrop=()=>reorderIntervals(idx);
-
-        div.innerHTML=`
-            <div class="row">
-                <div class="color ${i.color}"></div>
-                <div class="details">
-                    <input class="name-input" value="${i.name}"
-                        onblur="editName(${idx},this.value)">
-                    <input class="time-input" value="${fmt(i.total)}"
-                        onblur="editTime(${idx},this.value)">
-                </div>
-                <button class="delete-btn" onclick="deleteInterval(${idx})">🗑</button>
-            </div>
-            <div class="progress-row">
-                <div class="progress-track">
-                    <div class="progress-fill" style="width:${percent}%"></div>
-                </div>
-                <div class="time-left">${fmt(i.remaining)}</div>
-            </div>
-        `;
-        intervalList.appendChild(div);
-    });
-}
-
-/* ---------- editing ---------- */
-function editName(index,value){
-    if(value.trim()) intervals[index].name=value.trim();
-}
-
-function editTime(index,value){
-    const sec=mmssToSeconds(value);
-    if(!sec||sec<=0) return;
-    intervals[index].total=sec;
-    intervals[index].remaining=sec;
-    intervals[index].elapsed=0;
-    render(); updateUI();
-}
-
-/* ---------- drag ---------- */
-function reorderIntervals(dropIndex){
-    if(dragIndex===null||dragIndex===dropIndex) return;
-    const moved=intervals.splice(dragIndex,1)[0];
-    intervals.splice(dropIndex,0,moved);
-    current=Math.min(current,intervals.length-1);
-    render(); updateUI();
-}
-
-/* ---------- actions ---------- */
-function addInterval(){
-    intervals.push({
-        name:`Interval ${intervals.length+1}`,
-        total:60,
-        remaining:60,
-        elapsed:0,
-        color:colors[intervals.length%colors.length]
-    });
-    render(); updateUI();
-}
-
-function deleteInterval(index){
-    if(intervals.length===1) return alert("At least one interval required");
-    intervals.splice(index,1);
-    current=Math.max(0,Math.min(current,intervals.length-1));
-    render(); updateUI();
-}
-
-/* ---------- TIMER ---------- */
-function tick(){
-    const cur=intervals[current];
-    if(!cur) return;
-
-    if(cur.remaining===3) beep(900);
-    if(cur.remaining===2) beep(1000);
-    if(cur.remaining===1) beep(1100);
-
-    cur.remaining--;
-    cur.elapsed++;
-    totalElapsed++;
-
-    if(cur.remaining===0){
-        beep(1400,300);
-        vibrate([200,100,200]);
-
-        if(current<intervals.length-1){
-            current++;
-            render();
-        } else {
-            stopTimer();
-            return;
-        }
-    }
-
-    render(); updateUI();
-}
-
-function toggleTimer(){
-    running ? stopTimer() : startTimer();
-}
-
-function startTimer(){
-    timer=setInterval(tick,1000);
-    playBtn.textContent="⏸";
-    running=true;
-}
-
-function stopTimer(){
-    clearInterval(timer);
-    playBtn.textContent="▶";
-    running=false;
-}
-
-function resetTimer(){
-    stopTimer();
-    totalElapsed=0;
-    current=0;
-    intervals.forEach(i=>{
-        i.remaining=i.total;
-        i.elapsed=0;
-    });
-    render(); updateUI();
-}
-
-function skipInterval(){
-    beep(800);
-    vibrate([100]);
-    intervals[current].remaining=1;
-}
-
-/* ---------- UI ---------- */
-function updateUI(){
-    elapsed.textContent=fmt(totalElapsed);
-    lapCount.textContent=`${current+1}/${intervals.length}`;
-    timeLeft.textContent=fmt(
-        intervals.slice(current).reduce((s,i)=>s+i.remaining,0)
-    );
-}
-
-
-
-/* ---------- init --------test-- */
-render(); updateUI();
-    </script>
+render();update();
+</script>
 </body>
 </html>
