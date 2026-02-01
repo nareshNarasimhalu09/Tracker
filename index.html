@@ -3,129 +3,69 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Interval Timer with Excel Import / Export</title>
+<title>Interval Timer – Tasks</title>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
 <style>
-body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial;
-    background: #fff;
-    margin: 0;
-    display: flex;
-    justify-content: center;
+body{
+ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial;
+ background:#fff;margin:0;display:flex;justify-content:center
 }
-.container {
-    width: 75vw;
-    max-width: 900px;
-    min-width: 320px;
-    padding: 20px;
-    margin: 20px auto;
-    border-radius: 16px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+.container{
+ width:75vw;max-width:900px;min-width:320px;
+ padding:20px;margin:20px;border-radius:16px;
+ box-shadow:0 10px 30px rgba(0,0,0,.08)
 }
-.stats {
-    display: flex;
-    justify-content: space-between;
-    text-align: center;
+.stats{display:flex;justify-content:space-between;text-align:center}
+.stat-label{font-size:12px;color:#8e8e93}
+.stat-value{font-size:22px;font-weight:600}
+.header{display:flex;justify-content:space-between;align-items:center;margin:12px 0}
+.header-buttons button{margin-left:6px}
+.add-btn{
+ width:30px;height:30px;border-radius:50%;
+ background:#007aff;color:#fff;font-size:18px;border:none;cursor:pointer
 }
-.stat-label { font-size: 12px; color: #8e8e93; }
-.stat-value { font-size: 22px; font-weight: 600; }
-
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: 12px 0;
+.interval{
+ background:#f2f2f7;padding:12px;border-radius:12px;
+ margin-bottom:10px
 }
-.header-buttons button { margin-left: 6px; }
-
-.add-btn {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    background: #007aff;
-    color: #fff;
-    font-size: 18px;
-    border: none;
-    cursor: pointer;
+.interval.current{background:#e5e5ea}
+.interval.done{opacity:.55;text-decoration:line-through}
+.row{display:flex;align-items:center;gap:10px}
+.check{
+ width:20px;height:20px;border:2px solid #8e8e93;
+ border-radius:4px;cursor:pointer;
+ display:flex;align-items:center;justify-content:center;
+ font-size:14px;user-select:none
 }
-
-.interval {
-    background: #f2f2f7;
-    padding: 12px;
-    border-radius: 12px;
-    margin-bottom: 10px;
-    cursor: grab;
+.check.checked{background:#34c759;border-color:#34c759;color:#fff;font-weight:700}
+.color{width:5px;height:36px;border-radius:3px}
+.red{background:#ff3b30}
+.orange{background:#ff9500}
+.blue{background:#007aff}
+.details{flex:1;display:flex;justify-content:space-between;align-items:center}
+.name-input,.time-input{border:none;background:transparent;font-size:16px;width:300px}
+.time-input{width:70px;text-align:right}
+.actions{display:flex;gap:6px}
+.next-btn{
+ border:none;background:#34c759;color:#fff;
+ border-radius:6px;padding:4px 8px;
+ font-size:12px;cursor:pointer
 }
-.interval.current { background: #e5e5ea; }
-.interval.dragging { opacity: 0.5; }
-
-.row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+.delete-btn{border:none;background:transparent;font-size:18px;color:#ff3b30;cursor:pointer}
+.progress-row{display:flex;gap:10px;margin-top:8px}
+.progress-track{flex:1;height:6px;background:#d1d1d6;border-radius:3px}
+.progress-fill{height:100%;background:#007aff}
+.time-left{font-size:12px}
+.clock-time{font-size:12px;color:#6e6e73;margin-top:4px}
+.controls{display:flex;justify-content:space-around;margin-top:30px}
+.play{
+ width:60px;height:60px;background:#ff9500;color:#fff;
+ border-radius:50%;font-size:30px;
+ display:flex;justify-content:center;align-items:center;cursor:pointer
 }
-.color { width: 5px; height: 36px; border-radius: 3px; }
-.red { background:#ff3b30; }
-.orange { background:#ff9500; }
-.blue { background:#007aff; }
-
-.details {
-    flex: 1;
-    display: flex;
-    justify-content: space-between;
-}
-.name-input, .time-input {
-    border: none;
-    background: transparent;
-    font-size: 16px;
-}
-.time-input { width: 70px; text-align: right; }
-
-.delete-btn {
-    border: none;
-    background: transparent;
-    font-size: 18px;
-    color: #ff3b30;
-    cursor: pointer;
-}
-
-.progress-row {
-    display: flex;
-    gap: 10px;
-    margin-top: 8px;
-}
-.progress-track {
-    flex: 1;
-    height: 6px;
-    background: #d1d1d6;
-    border-radius: 3px;
-}
-.progress-fill {
-    height: 100%;
-    background: #007aff;
-}
-.time-left { font-size: 12px; }
-
-.controls {
-    display: flex;
-    justify-content: space-around;
-    margin-top: 30px;
-}
-.play {
-    width: 60px;
-    height: 60px;
-    background: #ff9500;
-    color: white;
-    border-radius: 50%;
-    font-size: 30px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-}
-.btn { font-size: 24px; cursor: pointer; }
+.btn{font-size:24px;cursor:pointer}
 </style>
 </head>
 
@@ -133,133 +73,169 @@ body {
 <div class="container">
 
 <div class="stats">
-    <div><div class="stat-label">Elapsed</div><div id="elapsed">00:00</div></div>
-    <div><div class="stat-label">Lap</div><div id="lapCount">1/1</div></div>
-    <div><div class="stat-label">Left</div><div id="timeLeft">00:00</div></div>
+ <div><div class="stat-label">Elapsed</div><div id="elapsed">00:00</div></div>
+ <div><div class="stat-label">Lap</div><div id="lapCount">1/1</div></div>
+ <div><div class="stat-label">Left</div><div id="timeLeft">00:00</div></div>
 </div>
 
 <div class="header">
-    <strong>Intervals</strong>
-    <div class="header-buttons">
-        <button class="add-btn" onclick="addInterval()">+</button>
-        <button class="add-btn" onclick="downloadExcel()">⬇</button>
-        <button class="add-btn" onclick="uploadExcel()">⬆</button>
-        <input type="file" id="excelInput" hidden>
-    </div>
+ <strong>Intervals</strong>
+ <div class="header-buttons">
+  <button class="add-btn" onclick="addInterval()">+</button>
+  <button class="add-btn" onclick="downloadExcel()">⬇</button>
+  <button class="add-btn" onclick="uploadExcel()">⬆</button>
+  <input type="file" id="excelInput" hidden>
+ </div>
 </div>
 
 <div id="intervalList"></div>
 
 <div class="controls">
-    <span class="btn" onclick="resetTimer()">↻</span>
-    <div class="play" id="playBtn" onclick="toggleTimer()">▶</div>
-    <span class="btn" onclick="skipInterval()">⏭</span>
+ <span class="btn" onclick="resetTimer()">↻</span>
+ <div class="play" id="playBtn" onclick="toggleTimer()">▶</div>
+ <span class="btn" onclick="skipInterval()">⏭</span>
 </div>
 
 </div>
 
 <script>
 const colors=["red","orange","blue"];
-let intervals=[{name:"Interval 1",total:60,remaining:60,elapsed:0,color:"red"}];
-let current=0,timer=null,running=false,totalElapsed=0,dragIndex=null;
+let intervals=[
+ {name:"Interval 1",total:60,remaining:60,elapsed:0,color:"red",done:false}
+];
 
-const fmt=s=>`${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
+let current=0,timer=null,running=false,totalElapsed=0;
+let baseClockTime=new Date();
+
+/* helpers */
+const fmt = s => {
+ const h = Math.floor(s / 3600);
+ const m = Math.floor((s % 3600) / 60);
+ const sec = s % 60;
+ return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}`;
+};
 const mmss=v=>{const[m,s]=v.split(":").map(Number);return m*60+(s||0);};
+const fmtClock=d=>d.getHours().toString().padStart(2,"0")+":"+d.getMinutes().toString().padStart(2,"0");
+
+/* CLOCK CALC — PROVEN LOGIC */
+function getIntervalClockTime(index){
+ let sec=0;
+ for(let i=0;i<index;i++) sec+=intervals[i].total;
+ return new Date(baseClockTime.getTime()+sec*1000);
+}
 
 function beep(f=1000,d=150){
  const c=new AudioContext(),o=c.createOscillator(),g=c.createGain();
- o.connect(g);g.connect(c.destination);o.frequency.value=f;g.gain.value=.1;
+ o.connect(g);g.connect(c.destination);
+ o.frequency.value=f;g.gain.value=.1;
  o.start();setTimeout(()=>{o.stop();c.close()},d);
 }
 
+/* render */
 function render(){
  intervalList.innerHTML="";
  intervals.forEach((i,idx)=>{
   const div=document.createElement("div");
-  div.className="interval"+(idx===current?" current":"");
-  div.draggable=true;
-  div.ondragstart=()=>dragIndex=idx;
-  div.ondrop=()=>reorder(idx);
-  div.ondragover=e=>e.preventDefault();
-
+  div.className=`interval${idx===current?" current":""}${i.done?" done":""}`;
   div.innerHTML=`
    <div class="row">
+    <div class="check ${i.done?"checked":""}" onclick="toggleDone(${idx})">${i.done?"✓":""}</div>
     <div class="color ${i.color}"></div>
     <div class="details">
-     <input class="name-input" value="${i.name}" onblur="iName(${idx},this.value)">
-     <input class="time-input" value="${fmt(i.total)}" onblur="iTime(${idx},this.value)">
+     <input class="name-input" value="${i.name}" onblur="editName(${idx},this.value)">
+     <input class="time-input" value="${fmt(i.total)}" onblur="editTime(${idx},this.value)">
     </div>
-    <button class="delete-btn" onclick="del(${idx})">🗑</button>
+    <div class="actions">
+     <button class="next-btn" onclick="completeInterval(${idx})">Next</button>
+     <button class="delete-btn" onclick="deleteInterval(${idx})">🗑</button>
+    </div>
    </div>
+
    <div class="progress-row">
-    <div class="progress-track"><div class="progress-fill" style="width:${i.elapsed/i.total*100}%"></div></div>
+    <div class="progress-track">
+     <div class="progress-fill" style="width:${(i.elapsed/i.total)*100}%"></div>
+    </div>
     <div class="time-left">${fmt(i.remaining)}</div>
-   </div>`;
+   </div>
+
+   <div class="clock-time">
+    ⏰ Starts at <strong>${fmtClock(getIntervalClockTime(idx))}</strong>
+   </div>
+  `;
   intervalList.appendChild(div);
  });
 }
 
-function iName(i,v){if(v.trim())intervals[i].name=v;}
-function iTime(i,v){
- const s=mmss(v); if(s>0){intervals[i].total=s;intervals[i].remaining=s;intervals[i].elapsed=0;}
- render();update();
+/* logic */
+function toggleDone(i){intervals[i].done=!intervals[i].done;if(intervals[i].done)completeInterval(i);render();updateUI();}
+function completeInterval(i){intervals[i].remaining=0;intervals[i].done=true;if(i===current&&current<intervals.length-1)current++;render();updateUI();}
+function editName(i,v){if(v.trim())intervals[i].name=v;}
+function editTime(i,v){
+ const s=mmss(v);
+ if(s>0){
+  intervals[i].total=s;
+  intervals[i].remaining=s;
+  intervals[i].elapsed=0;
+  baseClockTime=new Date();   // recalc times
+ }
+ render();updateUI();
 }
-
-function reorder(i){
- if(i===dragIndex)return;
- intervals.splice(i,0,intervals.splice(dragIndex,1)[0]);
- render();update();
-}
-
 function addInterval(){
- intervals.push({name:`Interval ${intervals.length+1}`,total:60,remaining:60,elapsed:0,color:colors[intervals.length%colors.length]});
- render();update();
+ intervals.push({name:`Interval ${intervals.length+1}`,total:60,remaining:60,elapsed:0,color:colors[intervals.length%colors.length],done:false});
+ baseClockTime=new Date();
+ render();updateUI();
 }
-
-function del(i){
+function deleteInterval(i){
  if(intervals.length===1)return;
  intervals.splice(i,1);
  current=Math.min(current,intervals.length-1);
- render();update();
+ baseClockTime=new Date();
+ render();updateUI();
 }
 
+/* timer */
 function tick(){
  const c=intervals[current];
- if(c.remaining<=3&&c.remaining>0)beep();
+ if(!c||c.done) return completeInterval(current);
+ if(c.remaining<=3&&c.remaining>0) beep();
  c.remaining--;c.elapsed++;totalElapsed++;
  if(c.remaining<=0){
-  beep(1400,300);
-  if(current<intervals.length-1)current++;
-  else return stop();
+  beep(1400,300);c.done=true;
+  if(current<intervals.length-1) current++; else return stopTimer();
  }
- render();update();
+ render();updateUI();
 }
+function startTimer(){
+ baseClockTime=new Date();   // LOCK CLOCK START
+ timer=setInterval(tick,1000);
+ running=true;playBtn.textContent="⏸";
+}
+function stopTimer(){clearInterval(timer);running=false;playBtn.textContent="▶";}
+function toggleTimer(){running?stopTimer():startTimer();}
+function resetTimer(){
+ stopTimer();
+ baseClockTime=new Date();
+ current=0;totalElapsed=0;
+ intervals.forEach(i=>{i.remaining=i.total;i.elapsed=0;i.done=false});
+ render();updateUI();
+}
+function skipInterval(){completeInterval(current);}
 
-function start(){timer=setInterval(tick,1000);running=true;playBtn.textContent="⏸";}
-function stop(){clearInterval(timer);running=false;playBtn.textContent="▶";}
-function toggleTimer(){running?stop():start();}
-function resetTimer(){stop();current=0;totalElapsed=0;intervals.forEach(i=>{i.remaining=i.total;i.elapsed=0});render();update();}
-function skipInterval(){intervals[current].remaining=1;}
-
-function update(){
+/* UI */
+function updateUI(){
  elapsed.textContent=fmt(totalElapsed);
  lapCount.textContent=`${current+1}/${intervals.length}`;
  timeLeft.textContent=fmt(intervals.slice(current).reduce((s,i)=>s+i.remaining,0));
 }
 
-/* ===== Excel (NO COLOR COLUMN) ===== */
+/* Excel */
 function downloadExcel(){
- const data=intervals.map(i=>({
-  Name:i.name,
-  Minutes:Math.floor(i.total/60),
-  Seconds:i.total%60
- }));
+ const data=intervals.map(i=>({Name:i.name,Minutes:Math.floor(i.total/60),Seconds:i.total%60}));
  const ws=XLSX.utils.json_to_sheet(data);
  const wb=XLSX.utils.book_new();
  XLSX.utils.book_append_sheet(wb,ws,"Intervals");
  XLSX.writeFile(wb,"intervals.xlsx");
 }
-
 function uploadExcel(){excelInput.click();}
 excelInput.onchange=e=>{
  const r=new FileReader();
@@ -268,14 +244,14 @@ excelInput.onchange=e=>{
   const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
   intervals=rows.map((r,i)=>{
    const t=(+r.Minutes||0)*60+(+r.Seconds||0)||60;
-   return {name:r.Name||`Interval ${i+1}`,total:t,remaining:t,elapsed:0,color:colors[i%colors.length]};
+   return{name:r.Name||`Interval ${i+1}`,total:t,remaining:t,elapsed:0,color:colors[i%colors.length],done:false};
   });
   resetTimer();
  };
  r.readAsArrayBuffer(e.target.files[0]);
 };
 
-render();update();
+render();updateUI();
 </script>
 </body>
 </html>
